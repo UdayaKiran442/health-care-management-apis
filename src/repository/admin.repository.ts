@@ -1,4 +1,5 @@
-import { CreateAdminInDBError } from "../exceptions/admin.exceptions";
+import { eq } from "drizzle-orm";
+import { CreateAdminInDBError, GetAdminByEmailFromDBError } from "../exceptions/admin.exceptions";
 import type { ICreateAdminSchema } from "../routes/v1/admin.route";
 import { generateNanoId } from "../utils/nanoId.utils";
 import db from "./db";
@@ -18,5 +19,14 @@ export async function createAdminInDB(payload: ICreateAdminSchema) {
 		return insertPayload;
 	} catch (error) {
 		throw new CreateAdminInDBError("Failed to create admin in DB", { cause: (error as Error).message });
+	}
+}
+
+export async function getAdminByEmailFromDB(email: string) {
+	try {
+		const adminData = await db.select().from(admin).where(eq(admin.email, email));
+		return adminData[0];
+	} catch (error) {
+		throw new GetAdminByEmailFromDBError("Failed to get admin by email from DB", { cause: (error as Error).message });
 	}
 }

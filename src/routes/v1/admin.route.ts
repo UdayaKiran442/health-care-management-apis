@@ -4,6 +4,7 @@ import z from "zod";
 import { createAdmin } from "../../controller/admin.controller";
 import { hashPassword } from "../../utils/hashPassword.utils";
 import { CreateAdminError, CreateAdminInDBError } from "../../exceptions/admin.exceptions";
+import { CreateUserInDBError } from "../../exceptions/user.exceptions";
 
 const adminRoute = new Hono();
 
@@ -37,7 +38,7 @@ adminRoute.post("/create", async (c) => {
 			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
 		}
 
-		if (error instanceof CreateAdminError || error instanceof CreateAdminInDBError) {
+		if (error instanceof CreateAdminError || error instanceof CreateAdminInDBError || error instanceof CreateUserInDBError) {
 			return c.json({ success: false, message: error.message, error: error.cause }, 500);
 		}
 

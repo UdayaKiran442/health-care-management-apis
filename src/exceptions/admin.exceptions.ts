@@ -17,3 +17,13 @@ export class CreateAdminError extends Error {
 		Error.captureStackTrace(this, this.constructor);
 	}
 }
+
+export class GetAdminByEmailFromDBError extends Error {
+	public cause?: unknown;
+	constructor(message: string, options?: { cause?: unknown }) {
+		super(message);
+		this.name = "GetAdminByEmailFromDBError";
+		if (options?.cause) this.cause = options.cause;
+		Error.captureStackTrace(this, this.constructor);
+	}
+}
