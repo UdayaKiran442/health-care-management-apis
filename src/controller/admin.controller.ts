@@ -49,6 +49,13 @@ export async function fixAppointment(payload: IFixAppointmentSchema) {
 		}
 
 		// create new appointment +30 mins from latest appointment
+		payload.appointmentDate.setHours(latestAppointment[0].appointmentDate.getHours());
+		payload.appointmentDate.setMinutes(latestAppointment[0].appointmentDate.getMinutes() + 30);
+		payload.appointmentDate.setSeconds(latestAppointment[0].appointmentDate.getSeconds());
+		payload.appointmentDate.setMilliseconds(latestAppointment[0].appointmentDate.getMilliseconds());
+
+		// insert into db and return appointment details
+		return await addAppointmentInDB(payload);
 
 		// insert into db and return appointment details
 	} catch (error) {
