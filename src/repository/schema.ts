@@ -37,3 +37,14 @@ export const patient = pgTable("patient", {
 	createdAt: timestamp("createdAt").notNull().defaultNow(),
 	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
+
+export const appointments = pgTable("appointments", {
+	appointmentId: varchar("appointment_id").primaryKey(),
+	patientId: varchar("patient_id").notNull(),
+	doctorId: varchar("doctor_id").notNull(),
+	appointmentDate: timestamp("appointment_date").notNull(),
+	status: varchar("status").notNull(),
+	reasonForVisit: varchar("reason_for_visit").notNull(),
+	createdAt: timestamp("createdAt").notNull().defaultNow(),
+	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+})

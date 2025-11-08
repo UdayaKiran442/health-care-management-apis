@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import z from "zod";
 
-import { assignDoctor, createAdmin } from "../../controller/admin.controller";
+import { assignDoctor, createAdmin, fixAppointment } from "../../controller/admin.controller";
 import { hashPassword } from "../../utils/hashPassword.utils";
 import { CreateAdminError, CreateAdminInDBError } from "../../exceptions/admin.exceptions";
 import { CreateUserInDBError } from "../../exceptions/user.exceptions";
@@ -113,6 +113,36 @@ adminRoute.post("/assign-patient", authMiddleware, authorizeMiddleware("admin"),
 			return c.json({ success: false, message: error.message, error: error.cause }, 500);
 		}
 		return c.json({ success: false, message: "Failed to assign patient", error: (error as Error).message }, 500);
+	}
+});
+
+const FixAppointmentSchema = z.object({
+	patientId: z.string().describe("ID of the patient"),
+	doctorId: z.string().describe("ID of the doctor"),
+	appointmentDateString: z.string().describe("Date of the appointment"),
+	reasonForVisit: z.string().describe("Reason for the visit"),
+});
+
+export type IFixAppointmentSchema = z.infer<typeof FixAppointmentSchema> & {
+	appointmentDate: Date;
+};
+
+adminRoute.post("/fix-appointment", authMiddleware, authorizeMiddleware("admin"), async (c) => {
+	try {
+		const validation = FixAppointmentSchema.safeParse(await c.req.json());
+		if (!validation.success) {
+			throw validation.error;
+		}
+
+		const payload = {
+			...validation.data,
+			appointmentDate: new Date(validation.data.appointmentDateString),
+		}
+		const appointment = await fixAppointment(payload);
+		// Implementation for fixing appointment goes here
+		return c.json({ success: true, message: "Appointment fixed successfully", appointment }, 201);
+	} catch (error) {
+		return c.json({ success: false, message: "Failed to fix appointment", error: (error as Error).message }, 500);
 	}
 });
 

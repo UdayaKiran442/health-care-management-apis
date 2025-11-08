@@ -27,3 +27,13 @@ export class GetAdminByEmailFromDBError extends Error {
 		Error.captureStackTrace(this, this.constructor);
 	}
 }
+
+export class FixAppointmentError extends Error {
+	public cause?: unknown;
+	constructor(message: string, options?: { cause?: unknown }) {
+		super(message);
+		this.name = "FixAppointmentError";
+		if (options?.cause) this.cause = options.cause;
+		Error.captureStackTrace(this, this.constructor);
+	}
+}

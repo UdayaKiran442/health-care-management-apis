@@ -1,11 +1,13 @@
 import { USER_ROLES } from "../constants/constants";
-import { CreateAdminError, CreateAdminInDBError } from "../exceptions/admin.exceptions";
-import { AddDoctorInDBError } from "../exceptions/doctor.exceptions";
+import { CreateAdminError, CreateAdminInDBError, FixAppointmentError } from "../exceptions/admin.exceptions";
+import { AddAppointmentToDBError } from "../exceptions/appointments.exceptions";
+import { AddDoctorInDBError, GetLatestAppointmentForDoctorFromDBError } from "../exceptions/doctor.exceptions";
 import { CreateUserInDBError } from "../exceptions/user.exceptions";
 import { createAdminInDB } from "../repository/admin.repository";
-import { addDoctorInDB } from "../repository/doctor.repository";
+import { addAppointmentInDB } from "../repository/appointments.repository";
+import { addDoctorInDB, getLatestAppointmentForDoctorFromDB } from "../repository/doctor.repository";
 import { addUserInDB } from "../repository/user.repository";
-import type { IAssignDoctorSchema, ICreateAdminSchema } from "../routes/v1/admin.route";
+import type { IAssignDoctorSchema, ICreateAdminSchema, IFixAppointmentSchema } from "../routes/v1/admin.route";
 
 export async function createAdmin(payload: ICreateAdminSchema) {
 	try {
@@ -28,5 +30,31 @@ export async function assignDoctor(payload: IAssignDoctorSchema) {
 			throw error;
 		}
 		throw new CreateAdminError("Failed to assign doctor", { cause: (error as Error).message });
+	}
+}
+
+export async function fixAppointment(payload: IFixAppointmentSchema) {
+	try {
+		// fetch doctor latest appointment for the day based on payload.doctorId and payload.appointmentDate
+		const latestAppointment = await getLatestAppointmentForDoctorFromDB({ doctorId: payload.doctorId, appointmentDate: payload.appointmentDate });
+
+		if (latestAppointment.length === 0) {
+			// create new appointment at payload.appointmentDate time at 9:00 AM
+			payload.appointmentDate.setHours(9);
+			payload.appointmentDate.setMinutes(0);
+			payload.appointmentDate.setSeconds(0);
+			payload.appointmentDate.setMilliseconds(0);
+			// insert into db and return appointment details
+			return await addAppointmentInDB(payload);
+		}
+
+		// create new appointment +30 mins from latest appointment
+
+		// insert into db and return appointment details
+	} catch (error) {
+		if (error instanceof GetLatestAppointmentForDoctorFromDBError || error instanceof AddAppointmentToDBError) {
+			throw error;
+		}
+		throw new FixAppointmentError("Failed to fix appointment", { cause: (error as Error).message });
 	}
 }
