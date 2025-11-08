@@ -36,7 +36,7 @@ export async function loginController(payload: ILoginSchema) {
 		}
 
 		// generate jwt token
-		return generateJwtToken({ id: user.userId, role: user.role });
+		return generateJwtToken({ userId: user.userId, role: user.role });
 	} catch (error) {
 		if (error instanceof GetUserByEmailFromDBError || error instanceof GetAdminByEmailFromDBError) {
 			throw error;

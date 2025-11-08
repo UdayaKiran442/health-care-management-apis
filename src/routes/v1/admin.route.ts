@@ -5,6 +5,8 @@ import { createAdmin } from "../../controller/admin.controller";
 import { hashPassword } from "../../utils/hashPassword.utils";
 import { CreateAdminError, CreateAdminInDBError } from "../../exceptions/admin.exceptions";
 import { CreateUserInDBError } from "../../exceptions/user.exceptions";
+import { authMiddleware } from "../../middleware/auth.middleware";
+import { authorizeMiddleware } from "../../middleware/authorize.middleware";
 
 const adminRoute = new Hono();
 
@@ -56,8 +58,14 @@ const AssignDoctorSchema = z.object({
 
 export type IAssignDoctorSchema = z.infer<typeof AssignDoctorSchema>;
 
-adminRoute.post("/assign-doctor", async (c) => {
-	return c.json({ message: "Doctor assigned successfully" }, 201);
+adminRoute.post("/assign-doctor", authMiddleware, authorizeMiddleware("admin"), async (c) => {
+	try {
+		const user = c.get("user");
+
+		return c.json({ success: true, message: "Doctor assigned successfully" }, 201);
+	} catch (error) {
+		return c.json({ success: false, message: "Failed to assign doctor", error: (error as Error).message }, 500);
+	}
 });
 
 const AssignPatientSchema = z.object({
