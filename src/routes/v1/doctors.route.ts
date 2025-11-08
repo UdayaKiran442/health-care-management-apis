@@ -5,8 +5,8 @@ import { authorizeMiddleware } from "../../middleware/authorize.middleware";
 import { USER_ROLES } from "../../constants/constants";
 import z from "zod";
 import { getDoctorAppointmentDetails, getDoctorAppointments } from "../../controller/doctors.controller";
-import { GetDoctorAppointmentsFromDBError } from "../../exceptions/appointments.exceptions";
-import { GetDoctorAppointmentDetailsError, GetDoctorAppointmentDetailsFromDBError, GetDoctorAppointmentsError } from "../../exceptions/doctor.exceptions";
+import { GetDoctorAppointmentDetailsFromDBError, GetDoctorAppointmentsFromDBError } from "../../exceptions/appointments.exceptions";
+import { GetDoctorAppointmentDetailsError, GetDoctorAppointmentsError } from "../../exceptions/doctor.exceptions";
 import logger from "../../services/logger.service";
 
 const doctorsRoute = new Hono();
