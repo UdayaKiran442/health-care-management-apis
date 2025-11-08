@@ -8,6 +8,7 @@ import { addAppointmentInDB, checkInPatientInDB } from "../repository/appointmen
 import { addDoctorInDB, getLatestAppointmentForDoctorFromDB } from "../repository/doctor.repository";
 import { addUserInDB } from "../repository/user.repository";
 import type { IAssignDoctorSchema, ICheckInPatientSchema, ICreateAdminSchema, IFixAppointmentSchema } from "../routes/v1/admin.route";
+import { sendNotification } from "../utils/notification.utils";
 
 export async function createAdmin(payload: ICreateAdminSchema) {
 	try {
@@ -55,9 +56,20 @@ export async function fixAppointment(payload: IFixAppointmentSchema) {
 		payload.appointmentDate.setMilliseconds(latestAppointment[0].appointmentDate.getMilliseconds());
 
 		// insert into db and return appointment details
-		return await addAppointmentInDB(payload);
-
-		// insert into db and return appointment details
+		const newAppointment = await addAppointmentInDB(payload);
+		await Promise.all([
+			sendNotification({
+				userId: payload.doctorId,
+				type: "NEW_APPOINTMENT",
+				message: `New appointment created at ${newAppointment.appointmentDate.toLocaleString()}`,
+			}),
+			sendNotification({
+				userId: payload.patientId,
+				type: "APPOINTMENT_CONFIRMED",
+				message: `New appointment confirmed, scheduled at ${newAppointment.appointmentDate.toLocaleString()}`,
+			}),
+		]);
+		return newAppointment;
 	} catch (error) {
 		if (error instanceof GetLatestAppointmentForDoctorFromDBError || error instanceof AddAppointmentToDBError) {
 			throw error;

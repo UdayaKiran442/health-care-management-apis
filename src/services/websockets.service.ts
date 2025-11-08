@@ -15,4 +15,15 @@ export class WebSocketService {
 		this.clients.set(userId, existingClients);
 	}
 
+	sendMessage(userId: string, message: string) {
+		const userClients = this.clients.get(userId);
+		if (userClients) {
+			for (const client of userClients) {
+				if (client.ws.readyState === WebSocket.OPEN) {
+					client.ws.send(message);
+				}
+			}
+		}
+	}
+	
 }
