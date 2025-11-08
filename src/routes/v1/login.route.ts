@@ -4,6 +4,7 @@ import { loginController } from "../../controller/login.controller";
 import { LoginError } from "../../exceptions/login.exceptions";
 import { GetAdminByEmailFromDBError } from "../../exceptions/admin.exceptions";
 import { GetUserByEmailFromDBError } from "../../exceptions/user.exceptions";
+import logger from "../../services/logger.service";
 
 const loginRoute = new Hono();
 
@@ -27,13 +28,16 @@ loginRoute.post("/", async (c) => {
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			const errMessage = JSON.parse(error.message);
+			logger.error("Validation Error: %o", errMessage);
 			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 401);
 		}
 
 		if (error instanceof LoginError || error instanceof GetUserByEmailFromDBError || error instanceof GetAdminByEmailFromDBError) {
+			logger.error("Application Error: %o", error);
 			return c.json({ success: false, message: error.message, error: error.cause }, 500);
 		}
 
+		logger.error("Unknown Error: %o", error);
 		return c.json({ success: false, error: (error as Error).message }, 500);
 	}
 });

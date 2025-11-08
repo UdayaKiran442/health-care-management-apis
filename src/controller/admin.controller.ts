@@ -1,7 +1,7 @@
 import { USER_ROLES } from "../constants/constants";
 import { CheckInPatientError, CreateAdminError, CreateAdminInDBError, FixAppointmentError } from "../exceptions/admin.exceptions";
 import { AddAppointmentToDBError, CheckInPatientInDBError } from "../exceptions/appointments.exceptions";
-import { AddDoctorInDBError, GetLatestAppointmentForDoctorFromDBError } from "../exceptions/doctor.exceptions";
+import { AddDoctorInDBError, AssignDoctorError, GetLatestAppointmentForDoctorFromDBError } from "../exceptions/doctor.exceptions";
 import { CreateUserInDBError } from "../exceptions/user.exceptions";
 import { createAdminInDB } from "../repository/admin.repository";
 import { addAppointmentInDB, checkInPatientInDB } from "../repository/appointments.repository";
@@ -29,7 +29,7 @@ export async function assignDoctor(payload: IAssignDoctorSchema) {
 		if (error instanceof AddDoctorInDBError || error instanceof CreateUserInDBError) {
 			throw error;
 		}
-		throw new CreateAdminError("Failed to assign doctor", { cause: (error as Error).message });
+		throw new AssignDoctorError("Failed to assign doctor", { cause: (error as Error).message });
 	}
 }
 

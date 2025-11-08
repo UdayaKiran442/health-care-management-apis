@@ -7,6 +7,7 @@ import z from "zod";
 import { getDoctorAppointments } from "../../controller/doctors.controller";
 import { GetDoctorAppointmentsFromDBError } from "../../exceptions/appointments.exceptions";
 import { GetDoctorAppointmentsError } from "../../exceptions/doctor.exceptions";
+import logger from "../../services/logger.service";
 
 const doctorsRoute = new Hono();
 
@@ -28,11 +29,14 @@ doctorsRoute.post("/appointments", authMiddleware, authorizeMiddleware(USER_ROLE
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			const errMessage = JSON.parse(error.message);
+			logger.error("Validation Error: %o", errMessage);
 			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
 		}
 		if (error instanceof GetDoctorAppointmentsError || error instanceof GetDoctorAppointmentsFromDBError) {
+			logger.error("Application Error: %o", error);
 			return c.json({ success: false, message: error.message, error: error.cause }, 500);
 		}
+		logger.error("Unknown Error: %o", error);
 		return c.json({ success: false, message: "Failed to fetch doctor's appointments", error: (error as Error).message }, 500);
 	}
 });

@@ -3,14 +3,16 @@ import z from "zod";
 
 import { assignDoctor, checkInPatient, createAdmin, fixAppointment } from "../../controller/admin.controller";
 import { hashPassword } from "../../utils/hashPassword.utils";
-import { CheckInPatientError, CreateAdminError, CreateAdminInDBError } from "../../exceptions/admin.exceptions";
+import { CheckInPatientError, CreateAdminError, CreateAdminInDBError, FixAppointmentError } from "../../exceptions/admin.exceptions";
 import { CreateUserInDBError } from "../../exceptions/user.exceptions";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { authorizeMiddleware } from "../../middleware/authorize.middleware";
 import { addPatient } from "../../controller/patient.controller";
 import { AddPatientError, AddPatientInDBError } from "../../exceptions/patient.exceptions";
 import { USER_ROLES } from "../../constants/constants";
-import { CheckInPatientInDBError } from "../../exceptions/appointments.exceptions";
+import { AddAppointmentToDBError, CheckInPatientInDBError } from "../../exceptions/appointments.exceptions";
+import logger from "../../services/logger.service";
+import { AddDoctorInDBError, AssignDoctorError } from "../../exceptions/doctor.exceptions";
 
 const adminRoute = new Hono();
 
@@ -41,13 +43,16 @@ adminRoute.post("/create", async (c) => {
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			const errMessage = JSON.parse(error.message);
+			logger.error("Validation Error: %o", errMessage);
 			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
 		}
 
 		if (error instanceof CreateAdminError || error instanceof CreateAdminInDBError || error instanceof CreateUserInDBError) {
+			logger.error("Application Error: %o", error);
 			return c.json({ success: false, message: error.message, error: error.cause }, 500);
 		}
 
+		logger.error("Unknown Error: %o", error);
 		return c.json({ success: false, message: "Failed to create admin", error: (error as Error).message }, 500);
 	}
 });
@@ -80,6 +85,16 @@ adminRoute.post("/assign-doctor", authMiddleware, authorizeMiddleware("admin"), 
 
 		return c.json({ success: true, message: "Doctor assigned successfully", newDoctor }, 201);
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const errMessage = JSON.parse(error.message);
+			logger.error("Validation Error: %o", errMessage);
+			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
+		}
+		if (error instanceof AddDoctorInDBError || error instanceof AssignDoctorError || error instanceof CreateUserInDBError) {
+			logger.error("Application Error: %o", error);
+			return c.json({ success: false, message: error.message, error: error.cause }, 500);
+		}
+		logger.error("Unknown Error: %o", error);
 		return c.json({ success: false, message: "Failed to assign doctor", error: (error as Error).message }, 500);
 	}
 });
@@ -111,9 +126,16 @@ adminRoute.post("/assign-patient", authMiddleware, authorizeMiddleware("admin"),
 
 		return c.json({ success: true, message: "Patient assigned successfully", newPatient }, 201);
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const errMessage = JSON.parse(error.message);
+			logger.error("Validation Error: %o", errMessage);
+			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
+		}
 		if (error instanceof AddPatientInDBError || error instanceof AddPatientError) {
+			logger.error("Application Error: %o", error);
 			return c.json({ success: false, message: error.message, error: error.cause }, 500);
 		}
+		logger.error("Unknown Error: %o", error);
 		return c.json({ success: false, message: "Failed to assign patient", error: (error as Error).message }, 500);
 	}
 });
@@ -144,6 +166,16 @@ adminRoute.post("/fix-appointment", authMiddleware, authorizeMiddleware("admin")
 		// Implementation for fixing appointment goes here
 		return c.json({ success: true, message: "Appointment fixed successfully", appointment }, 201);
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const errMessage = JSON.parse(error.message);
+			logger.error("Validation Error: %o", errMessage);
+			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
+		}
+		if (error instanceof FixAppointmentError || error instanceof AddAppointmentToDBError) {
+			logger.error("Application Error: %o", error);
+			return c.json({ success: false, message: error.message, error: error.cause }, 500);
+		}
+		logger.error("Unknown Error: %o", error);
 		return c.json({ success: false, message: "Failed to fix appointment", error: (error as Error).message }, 500);
 	}
 });
@@ -167,9 +199,16 @@ adminRoute.post("/checkin-patient", authMiddleware, authorizeMiddleware(USER_ROL
 		const result = await checkInPatient(payload);
 		return c.json({ success: true, message: "Patient checked in successfully", result }, 201);
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const errMessage = JSON.parse(error.message);
+			logger.error("Validation Error: %o", errMessage);
+			return c.json({ success: false, error: errMessage[0], message: errMessage[0].message }, 400);
+		}
 		if (error instanceof CheckInPatientInDBError || error instanceof CheckInPatientError) {
+			logger.error("Application Error: %o", error);
 			return c.json({ success: false, message: error.message, error: error.cause }, 500);
 		}
+		logger.error("Unknown Error: %o", error);
 		return c.json({ success: false, message: "Failed to check in patient", error: (error as Error).message }, 500);
 	}
 });
