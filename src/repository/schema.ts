@@ -33,7 +33,6 @@ export const patient = pgTable("patient", {
 	name: varchar("name").notNull(),
 	email: varchar("email").notNull().unique(),
 	passwordHash: varchar("password_hash").notNull(),
-	dateOfBirth: timestamp("date_of_birth").notNull(),
 	phone: varchar("phone").notNull(),
 	createdAt: timestamp("createdAt").notNull().defaultNow(),
 	updatedAt: timestamp("updatedAt").notNull().defaultNow(),

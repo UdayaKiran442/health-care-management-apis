@@ -7,6 +7,8 @@ import { CreateAdminError, CreateAdminInDBError } from "../../exceptions/admin.e
 import { CreateUserInDBError } from "../../exceptions/user.exceptions";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { authorizeMiddleware } from "../../middleware/authorize.middleware";
+import { addPatient } from "../../controller/patient.controller";
+import { AddPatientError, AddPatientInDBError } from "../../exceptions/patient.exceptions";
 
 const adminRoute = new Hono();
 
@@ -84,14 +86,34 @@ const AssignPatientSchema = z.object({
 	name: z.string().describe("Name of the patient"),
 	email: z.string().describe("Email of the patient"),
 	password: z.string().describe("Password for the patient account"),
-	dateOfBirth: z.string().describe("Date of birth of the patient"),
 	phone: z.string().describe("Phone number of the patient"),
 });
 
-export type IAssignPatientSchema = z.infer<typeof AssignPatientSchema>;
+export type IAssignPatientSchema = z.infer<typeof AssignPatientSchema> & {
+	hashedPassword: string;
+};
 
-adminRoute.post("/assign-patient", async (c) => {
-	return c.json({ message: "Patient assigned successfully" }, 201);
+adminRoute.post("/assign-patient", authMiddleware, authorizeMiddleware("admin"), async (c) => {
+	try {
+		const validation = AssignPatientSchema.safeParse(await c.req.json());
+		if (!validation.success) {
+			throw validation.error;
+		}
+
+		const payload = {
+			...validation.data,
+			hashedPassword: await hashPassword(validation.data.password),
+		};
+
+		const newPatient = await addPatient(payload);
+
+		return c.json({ success: true, message: "Patient assigned successfully", newPatient }, 201);
+	} catch (error) {
+		if (error instanceof AddPatientInDBError || error instanceof AddPatientError) {
+			return c.json({ success: false, message: error.message, error: error.cause }, 500);
+		}
+		return c.json({ success: false, message: "Failed to assign patient", error: (error as Error).message }, 500);
+	}
 });
 
 export default adminRoute;

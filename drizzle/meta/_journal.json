@@ -15,6 +15,13 @@
       "when": 1762557687002,
       "tag": "0001_sad_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762564240966,
+      "tag": "0002_gray_wolf_cub",
+      "breakpoints": true
     }
   ]
 }
