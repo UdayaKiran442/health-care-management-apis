@@ -47,4 +47,12 @@ export const appointments = pgTable("appointments", {
 	reasonForVisit: varchar("reason_for_visit").notNull(),
 	createdAt: timestamp("createdAt").notNull().defaultNow(),
 	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-})
+});
+
+export const notes = pgTable("notes", {
+	noteId: varchar("note_id").primaryKey(),
+	appointmentId: varchar("appointment_id").notNull(),
+	content: varchar("content").notNull(),
+	createdAt: timestamp("createdAt").notNull().defaultNow(),
+	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
