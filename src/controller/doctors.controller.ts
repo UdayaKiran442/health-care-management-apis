@@ -1,6 +1,6 @@
-import { GetDoctorAppointmentsFromDBError } from "../exceptions/appointments.exceptions";
-import { GetDoctorAppointmentDetailsError, GetDoctorAppointmentDetailsFromDBError, GetDoctorAppointmentsError } from "../exceptions/doctor.exceptions";
-import { getDoctorAppointmentsFromDB } from "../repository/appointments.repository";
+import { GetDoctorAppointmentDetailsFromDBError, GetDoctorAppointmentsFromDBError } from "../exceptions/appointments.exceptions";
+import { GetDoctorAppointmentDetailsError, GetDoctorAppointmentsError } from "../exceptions/doctor.exceptions";
+import { getDoctorAppointmentsFromDB, getPatientAppointmentsFromDB } from "../repository/appointments.repository";
 import { getDoctorAppointmentDetailsFromDB } from "../repository/doctor.repository";
 import type { IGetDoctorAppointmentSchema } from "../routes/v1/doctors.route";
 
@@ -21,7 +21,8 @@ export async function getDoctorAppointments(doctorId: string) {
 
 export async function getDoctorAppointmentDetails(payload: IGetDoctorAppointmentSchema) {
 	try {
-		return await getDoctorAppointmentDetailsFromDB(payload);
+		// const patientHistory
+		return await Promise.all([getDoctorAppointmentDetailsFromDB(payload), getPatientAppointmentsFromDB(payload.patientId)]);
 	} catch (error) {
 		if (error instanceof GetDoctorAppointmentDetailsFromDBError) {
 			throw error;
