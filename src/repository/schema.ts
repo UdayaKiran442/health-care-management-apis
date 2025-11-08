@@ -1,4 +1,4 @@
-import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
 	userId: varchar("user_id").primaryKey(),
@@ -53,6 +53,18 @@ export const notes = pgTable("notes", {
 	noteId: varchar("note_id").primaryKey(),
 	appointmentId: varchar("appointment_id").notNull(),
 	content: varchar("content").notNull(),
+	createdAt: timestamp("createdAt").notNull().defaultNow(),
+	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export const notifications = pgTable("notifications", {
+	notificationId: varchar("notification_id").primaryKey(),
+	userId: varchar("user_id").notNull(),
+	type: varchar("type").notNull(),
+	title: varchar("title").notNull(),
+	message: varchar("message").notNull(),
+	data: text("data"), // JSON string with additional data
+	isRead: boolean("is_read").notNull().default(false),
 	createdAt: timestamp("createdAt").notNull().defaultNow(),
 	updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });

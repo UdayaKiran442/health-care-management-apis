@@ -37,3 +37,23 @@ export class AssignDoctorError extends Error {
 		Error.captureStackTrace(this, this.constructor);
 	}
 }
+
+export class GetDoctorAppointmentDetailsError extends Error {
+	public cause?: unknown;
+	constructor(message: string, options?: { cause?: unknown }) {
+		super(message);
+		this.name = "GetDoctorAppointmentDetailsError";
+		if (options?.cause) this.cause = options.cause;
+		Error.captureStackTrace(this, this.constructor);
+	}
+}
+
+export class GetDoctorAppointmentDetailsFromDBError extends Error {
+	public cause?: unknown;
+	constructor(message: string, options?: { cause?: unknown }) {
+		super(message);
+		this.name = "GetDoctorAppointmentDetailsFromDBError";
+		if (options?.cause) this.cause = options.cause;
+		Error.captureStackTrace(this, this.constructor);
+	}
+}
