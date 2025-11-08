@@ -1,14 +1,16 @@
 import { Hono } from "hono";
 import z from "zod";
 
-import { assignDoctor, createAdmin, fixAppointment } from "../../controller/admin.controller";
+import { assignDoctor, checkInPatient, createAdmin, fixAppointment } from "../../controller/admin.controller";
 import { hashPassword } from "../../utils/hashPassword.utils";
-import { CreateAdminError, CreateAdminInDBError } from "../../exceptions/admin.exceptions";
+import { CheckInPatientError, CreateAdminError, CreateAdminInDBError } from "../../exceptions/admin.exceptions";
 import { CreateUserInDBError } from "../../exceptions/user.exceptions";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { authorizeMiddleware } from "../../middleware/authorize.middleware";
 import { addPatient } from "../../controller/patient.controller";
 import { AddPatientError, AddPatientInDBError } from "../../exceptions/patient.exceptions";
+import { USER_ROLES } from "../../constants/constants";
+import { CheckInPatientInDBError } from "../../exceptions/appointments.exceptions";
 
 const adminRoute = new Hono();
 
@@ -137,12 +139,38 @@ adminRoute.post("/fix-appointment", authMiddleware, authorizeMiddleware("admin")
 		const payload = {
 			...validation.data,
 			appointmentDate: new Date(validation.data.appointmentDateString),
-		}
+		};
 		const appointment = await fixAppointment(payload);
 		// Implementation for fixing appointment goes here
 		return c.json({ success: true, message: "Appointment fixed successfully", appointment }, 201);
 	} catch (error) {
 		return c.json({ success: false, message: "Failed to fix appointment", error: (error as Error).message }, 500);
+	}
+});
+
+const CheckInPatientSchema = z.object({
+	appointmentId: z.string().describe("ID of the appointment"),
+});
+
+export type ICheckInPatientSchema = z.infer<typeof CheckInPatientSchema>;
+
+adminRoute.post("/checkin-patient", authMiddleware, authorizeMiddleware(USER_ROLES.ADMIN), async (c) => {
+	try {
+		const validation = CheckInPatientSchema.safeParse(await c.req.json());
+		if (!validation.success) {
+			throw validation.error;
+		}
+
+		const payload = validation.data;
+
+		// Call the check-in function
+		const result = await checkInPatient(payload);
+		return c.json({ success: true, message: "Patient checked in successfully", result }, 201);
+	} catch (error) {
+		if (error instanceof CheckInPatientInDBError || error instanceof CheckInPatientError) {
+			return c.json({ success: false, message: error.message, error: error.cause }, 500);
+		}
+		return c.json({ success: false, message: "Failed to check in patient", error: (error as Error).message }, 500);
 	}
 });
 

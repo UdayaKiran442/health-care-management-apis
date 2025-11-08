@@ -1,13 +1,13 @@
 import { USER_ROLES } from "../constants/constants";
-import { CreateAdminError, CreateAdminInDBError, FixAppointmentError } from "../exceptions/admin.exceptions";
-import { AddAppointmentToDBError } from "../exceptions/appointments.exceptions";
+import { CheckInPatientError, CreateAdminError, CreateAdminInDBError, FixAppointmentError } from "../exceptions/admin.exceptions";
+import { AddAppointmentToDBError, CheckInPatientInDBError } from "../exceptions/appointments.exceptions";
 import { AddDoctorInDBError, GetLatestAppointmentForDoctorFromDBError } from "../exceptions/doctor.exceptions";
 import { CreateUserInDBError } from "../exceptions/user.exceptions";
 import { createAdminInDB } from "../repository/admin.repository";
-import { addAppointmentInDB } from "../repository/appointments.repository";
+import { addAppointmentInDB, checkInPatientInDB } from "../repository/appointments.repository";
 import { addDoctorInDB, getLatestAppointmentForDoctorFromDB } from "../repository/doctor.repository";
 import { addUserInDB } from "../repository/user.repository";
-import type { IAssignDoctorSchema, ICreateAdminSchema, IFixAppointmentSchema } from "../routes/v1/admin.route";
+import type { IAssignDoctorSchema, ICheckInPatientSchema, ICreateAdminSchema, IFixAppointmentSchema } from "../routes/v1/admin.route";
 
 export async function createAdmin(payload: ICreateAdminSchema) {
 	try {
@@ -63,5 +63,16 @@ export async function fixAppointment(payload: IFixAppointmentSchema) {
 			throw error;
 		}
 		throw new FixAppointmentError("Failed to fix appointment", { cause: (error as Error).message });
+	}
+}
+
+export async function checkInPatient(payload: ICheckInPatientSchema) {
+	try {
+		await checkInPatientInDB(payload.appointmentId);
+	} catch (error) {
+		if (error instanceof CheckInPatientInDBError) {
+			throw error;
+		}
+		throw new CheckInPatientError("Failed to check in patient", { cause: (error as Error).message });
 	}
 }

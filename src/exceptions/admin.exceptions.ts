@@ -37,3 +37,13 @@ export class FixAppointmentError extends Error {
 		Error.captureStackTrace(this, this.constructor);
 	}
 }
+
+export class CheckInPatientError extends Error {
+	public cause?: unknown;
+	constructor(message: string, options?: { cause?: unknown }) {
+		super(message);
+		this.name = "CheckInPatientError";
+		if (options?.cause) this.cause = options.cause;
+		Error.captureStackTrace(this, this.constructor);
+	}
+}
