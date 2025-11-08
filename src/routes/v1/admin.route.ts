@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import z from "zod";
 
-import { createAdmin } from "../../controller/admin.controller";
+import { assignDoctor, createAdmin } from "../../controller/admin.controller";
 import { hashPassword } from "../../utils/hashPassword.utils";
 import { CreateAdminError, CreateAdminInDBError } from "../../exceptions/admin.exceptions";
 import { CreateUserInDBError } from "../../exceptions/user.exceptions";
@@ -56,13 +56,25 @@ const AssignDoctorSchema = z.object({
 	department: z.string().describe("Department of the doctor"),
 });
 
-export type IAssignDoctorSchema = z.infer<typeof AssignDoctorSchema>;
+export type IAssignDoctorSchema = z.infer<typeof AssignDoctorSchema> & {
+	hashedPassword: string;
+};
 
 adminRoute.post("/assign-doctor", authMiddleware, authorizeMiddleware("admin"), async (c) => {
 	try {
-		const user = c.get("user");
+		const validation = AssignDoctorSchema.safeParse(await c.req.json());
+		if (!validation.success) {
+			throw validation.error;
+		}
 
-		return c.json({ success: true, message: "Doctor assigned successfully" }, 201);
+		const payload = {
+			...validation.data,
+			hashedPassword: await hashPassword(validation.data.password),
+		};
+
+		const newDoctor = await assignDoctor(payload);
+
+		return c.json({ success: true, message: "Doctor assigned successfully", newDoctor }, 201);
 	} catch (error) {
 		return c.json({ success: false, message: "Failed to assign doctor", error: (error as Error).message }, 500);
 	}
