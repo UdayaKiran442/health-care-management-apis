@@ -1,0 +1,15 @@
+# Docker Compose file version
+version: "3.8"
+
+# Define the services (containers) for your application
+services:
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # Map to a different host port like 8080 to avoid conflicts
+    env_file:
+      - .env
+      
+    container_name: health-care-management-apis
