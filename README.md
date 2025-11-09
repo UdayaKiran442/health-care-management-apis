@@ -219,3 +219,87 @@ Payload:
 appointmentId: string
 ```
 
+### Doctor Route
+
+Base Path: /doctor
+
+**Fetch all appointments**
+Description: To get all appointments of the doctor for the day.
+
+Path: /appointments
+
+Method: POST
+
+Payload:
+```ts
+doctorId: string
+```
+
+Response:
+```ts
+{
+    appointmentId: string;
+    patientId: string;
+    doctorId: string;
+    appointmentDate: Date;
+    status: string;
+    reasonForVisit: string;
+    createdAt: Date;
+    updatedAt: Date;
+}[]
+```
+
+**Fetch an appointment**
+Description: Fetch a particular appointment details along with patient history
+
+Path: /appointment
+
+Method: POST
+
+Payload:
+```ts
+patientId: string,
+appointmentId: string
+```
+
+Response:
+```ts
+[{
+    appointmentId: string;
+    doctorId: string;
+    patientId: string;
+    appointmentDate: Date;
+    reasonForVisit: string;
+    patientName: string;
+    patientEmail: string;
+    patientPhone: string;
+}, {
+    appointmentId: string;
+    patientId: string;
+    doctorId: string;
+    appointmentDate: Date;
+    status: string;
+    reasonForVisit: string;
+    createdAt: Date;
+    updatedAt: Date;
+}[]]
+```
+### Login Route
+
+Base Url: /login
+
+**Login User**
+Description: To login user for the website
+
+Method: POST
+
+Payload:
+```ts
+email: string,
+password: string
+```
+
+Response:
+```ts
+token: string
+```
