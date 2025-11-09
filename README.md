@@ -303,3 +303,9 @@ Response:
 ```ts
 token: string
 ```
+
+## Tech Stack
+Backend - BunJS as run time environment and HonoJS as router
+Error logging tool - Winston
+Real time communication - Bun Websockets
+
