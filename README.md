@@ -67,3 +67,15 @@ src/
 - Should not be committed to the repository.
 
 ## API Documentation
+
+### Admin Route
+
+**Create Admin**
+Description: This route is for creating admin for the clinic.
+
+Payload:
+```
+name: string
+email: string
+password: string
+```
