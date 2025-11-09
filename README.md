@@ -207,3 +207,15 @@ Response:
     updatedAt: Date;
 }
 ```
+**Check In Patient**
+Description: To check in patient who came for treatment during the scheduled appointment time.
+
+Path: /checkin-patient
+
+Method: POST
+
+Payload:
+```ts
+appointmentId: string
+```
+
